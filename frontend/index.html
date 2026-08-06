@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patrikar Petroleum Point - IndianOil Admin Portal</title>
+  <meta name="description" content="Official Petrol Pump Operations, Fuel Tank Monitoring, Nozzle Meter Readings, and Accounts Ledger Admin Portal for Patrikar Petroleum Point (IndianOil Dealership).">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- IndianOil Theme Login Container -->
+  <div id="login-container">
+    <div class="login-ambient-bg">
+      <div class="glow-orb orb-saffron"></div>
+      <div class="glow-orb orb-navy"></div>
+      <div class="glow-orb orb-yellow"></div>
+      <div class="bg-pattern-grid"></div>
+    </div>
+
+    <div class="login-card-wrapper">
+      <div class="login-card">
+
+        <!-- Card Header with IndianOil Logo & Branding -->
+        <div class="login-header">
+          <div class="login-brand-logo">
+            <img src="./images/indianoil-logo.png" alt="IndianOil Logo">
+          </div>
+          <div class="login-brand-meta">
+            <span class="iocl-pill">IndianOil Dealership • RO: MP-0439</span>
+            <h2>Patrikar Petroleum Point</h2>
+            <p>Station Operational & Accounts Admin Portal</p>
+          </div>
+        </div>
+
+        <!-- Alert Notification Box -->
+        <div id="login-alert" class="login-alert-box" style="display: none;">
+          <span class="alert-icon">⚠️</span>
+          <span id="login-alert-msg">Invalid username or password</span>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" onsubmit="App.handleLogin(event)" novalidate>
+          <div class="form-group-custom">
+            <label for="login-username">Admin Username</label>
+            <div class="input-with-icon">
+              <span class="field-icon">👤</span>
+              <input type="text" id="login-username" class="login-input" placeholder="Enter username (e.g. admin)" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group-custom">
+            <label for="login-password">Password</label>
+            <div class="input-with-icon">
+              <span class="field-icon">🔒</span>
+              <input type="password" id="login-password" class="login-input" placeholder="Enter password" required autocomplete="current-password">
+              <button type="button" id="btn-toggle-pass" class="btn-toggle-password" onclick="App.togglePasswordVisibility()" title="Toggle password visibility">👁️</button>
+            </div>
+          </div>
+
+          <div class="login-options">
+            <label class="remember-me">
+              <input type="checkbox" id="remember-me" checked>
+              <span>Remember me</span>
+            </label>
+            <a href="javascript:void(0)" onclick="App.showToast('Please contact Manager Manoj Patrikar for password resets.', 'info')" class="forgot-link">Need Help?</a>
+          </div>
+
+          <button type="submit" id="btn-login-submit" class="btn-login-cta">
+            <span class="btn-text">Sign In to Admin Portal</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+
+       
+        <!-- Portal Security Footer -->
+        <div class="login-footer">
+          <p>🔒 Secured IndianOil Network • 256-Bit SSL</p>
+          <small>© 2026 Patrikar Petroleum Point. All Rights Reserved.</small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="app-container" style="display: none;">
+
+    <!-- Top App Header Bar -->
+    <header class="top-header">
+      <div class="brand-section">
+        <div class="brand-logo">
+         <img src="./images/indianoil-logo.png" alt="Patrikar Petroleum Point Logo">
+        </div>
+        <div class="brand-text">
+          <h1>Patrikar Petroleum Point <span class="brand-badge">IndianOil</span></h1>
+          <p>RO Number: MP-0439 • NH 47, Pandruna Nagpur Road</p>
+        </div>
+      </div>
+
+      <!-- Live Fuel Rates Ticker -->
+      <div class="header-rates-bar" id="header-rates-ticker">
+        <div class="rate-chip"><span class="fuel-name">Petrol (MS):</span> <span class="fuel-val" id="rate-ms">₹116.03</span></div>
+        <div class="rate-chip"><span class="fuel-name">Diesel (HSD):</span> <span class="fuel-val" id="rate-hsd">₹101.08</span></div>
+        <button class="btn-update-rates" onclick="App.openModal('modal-update-rates')">✎ Edit Rates</button>
+      </div>
+
+      <!-- Header Right: Clock, Shift & User Profile -->
+      <div class="header-actions">
+        <div class="header-clock" id="live-clock">06 Aug 2026 | 09:15:00 AM</div>
+        <div class="user-badge" id="user-badge">
+          <div class="user-avatar">M</div>
+          <div class="user-info">
+            <span class="user-name" id="current-user-name">Manoj Patrikar</span>
+            <span class="user-role">Admin</span>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout" onclick="App.logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+
+      <!-- Left Sidebar Navigation -->
+      <aside class="sidebar">
+        <ul class="nav-list">
+          <li class="nav-item active" data-view="dashboard" onclick="App.switchView('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard & Gauges</span>
+          </li>
+          <li class="nav-item" data-view="tanks" onclick="App.switchView('tanks')">
+            <span class="nav-icon">⛽</span>
+            <span>Tank Stock & Refills</span>
+          </li>
+          <li class="nav-item" data-view="shifts" onclick="App.switchView('shifts')">
+            <span class="nav-icon">📝</span>
+            <span>Nozzle Shift Readings</span>
+          </li>
+          <li class="nav-item" data-view="reconciliation" onclick="App.switchView('reconciliation')">
+            <span class="nav-icon">💰</span>
+            <span>Payment Reconciliation</span>
+          </li>
+          <li class="nav-item" data-view="credit" onclick="App.switchView('credit')">
+            <span class="nav-icon">📒</span>
+            <span>Customer Udhar Ledger</span>
+          </li>
+          <li class="nav-item" data-view="expenses" onclick="App.switchView('expenses')">
+            <span class="nav-icon">💸</span>
+            <span>Daily Expenses</span>
+          </li>
+          <li class="nav-item" data-view="employees" onclick="App.switchView('employees')">
+            <span class="nav-icon">👥</span>
+            <span>Employee Management</span>
+          </li>
+          <li class="nav-item" data-view="reports" onclick="App.switchView('reports')">
+            <span class="nav-icon">📈</span>
+            <span>Day-End Settlement</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Main Workspace Views -->
+      <main class="content-area">
+
+        <!-- MODULE 1 & 2: DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Station Operational Overview</h2>
+              <p>Real-time fuel sales metrics, dip tank stocks & recent station activity.</p>
+            </div>
+            <div class="view-header-actions">
+              <input type="date" id="dash-date-picker" class="form-control" style="width: auto;" onchange="App.loadDashboardData()">
+              <button class="btn btn-primary" onclick="App.openModal('modal-log-shift')">+ Log Shift Reading</button>
+            </div>
+          </div>
+
+          <!-- KPI Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Gross Shift Sales</span>
+                <div class="kpi-icon navy">₹</div>
+              </div>
+              <div class="kpi-value" id="kpi-total-sales">₹2,17,300</div>
+              <div class="kpi-subtitle" id="kpi-total-litres">2,168 Litres Sold Today</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Cash in Drawer</span>
+                <div class="kpi-icon green">💵</div>
+              </div>
+              <div class="kpi-value" id="kpi-cash-collected">₹1,15,400</div>
+              <div class="kpi-subtitle">Physical Cash Received</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Digital UPI / POS</span>
+                <div class="kpi-icon blue">📲</div>
+              </div>
+              <div class="kpi-value" id="kpi-digital-collected">₹65,200</div>
+              <div class="kpi-subtitle">PhonePe / Paytm / Cards</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Udhar / Credit Fuel</span>
+                <div class="kpi-icon orange">📒</div>
+              </div>
+              <div class="kpi-value" id="kpi-udhar-due">₹36,700</div>
+              <div class="kpi-subtitle">Credit Bills Logged</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-title">Today Expenses</span>
+                <div class="kpi-icon red">💸</div>
+              </div>
+              <div class="kpi-value" id="kpi-today-expenses">₹2,974</div>
+              <div class="kpi-subtitle">Station Operational Expenses</div>
+            </div>
+          </div>
+
+          <!-- Underground Fuel Tank Gauges Section -->
+          <div class="panel-card" style="margin-bottom: 24px;">
+            <div class="panel-header">
+              <h3>Underground Storage Tank Stock Levels</h3>
+              <button class="btn btn-secondary btn-sm" onclick="App.openModal('modal-tank-refill')">+ Log Tanker Stock Refill</button>
+            </div>
+            <div class="tanks-grid" id="dashboard-tanks-container">
+              <!-- Dynamically populated tank gauges -->
+            </div>
+          </div>
+
+          <!-- Charts & Transaction Log -->
+          <div class="panel-grid">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>Today's Nozzle Fuel Sales Distribution</h3>
+              </div>
+              <div style="height: 280px; position: relative;">
+                <canvas id="chart-sales-distribution"></canvas>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>Recent Nozzle Shift Log</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Shift</th>
+                      <th>Nozzle</th>
+                      <th>Litres</th>
+                      <th>Total (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-recent-shifts">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 3: TANK STOCK & REFILLS VIEW -->
+        <section id="view-tanks" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Fuel Tank Stock & Refill Deliveries</h2>
+              <p>Monitor underground dip levels, tank capacities, and tanker refill receipts.</p>
+            </div>
+            <div class="view-header-actions">
+              <button class="btn btn-secondary" onclick="App.openModal('modal-add-tank')">+ Add Tank</button>
+              <button class="btn btn-primary" onclick="App.openModal('modal-tank-refill')">+ Log Tanker Delivery (Stock In)</button>
+            </div>
+          </div>
+
+          <div class="tanks-grid" id="tanks-management-container" style="margin-bottom: 24px;">
+            <!-- Populated dynamically -->
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Tanker Stock Refill History</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Tank Name</th>
+                    <th>Fuel Type</th>
+                    <th>Invoice No</th>
+                    <th>Litres Delivered</th>
+                    <th>Rate / L</th>
+                    <th>Supplier</th>
+                  </tr>
+                </thead>
+                <tbody id="tanks-refill-table">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 4: NOZZLE SHIFT READINGS VIEW -->
+        <section id="view-shifts" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Nozzle Meter Reading & Shift Calculator</h2>
+              <p>Log opening/closing dispenser meter numbers, testing deductions, and attendant assignments.</p>
+            </div>
+            <div class="view-header-actions">
+              <input type="date" id="shift-filter-date" class="form-control" style="width: auto;" onchange="App.loadShiftsData()">
+              <button class="btn btn-primary" onclick="App.openModal('modal-log-shift')">+ Log Nozzle Meter Reading</button>
+            </div>
+          </div>
+
+          <div class="panel-card" style="margin-bottom: 24px;">
+            <div style="height: 240px; position: relative;">
+              <canvas id="chart-shift-sales"></canvas>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Shift Reading Entries</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Shift</th>
+                    <th>Nozzle Name</th>
+                    <th>Fuel Type</th>
+                    <th>Opening Meter</th>
+                    <th>Closing Meter</th>
+                    <th>Testing (L)</th>
+                    <th>Net Sold (L)</th>
+                    <th>Rate (₹)</th>
+                    <th>Total Bill (₹)</th>
+                    <th>Attendant</th>
+                  </tr>
+                </thead>
+                <tbody id="shift-readings-table">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 5: PAYMENT RECONCILIATION VIEW -->
+        <section id="view-reconciliation" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Payment Sales Reconciliation</h2>
+              <p>Reconcile expected meter sales revenue against actual cash, digital UPI, and Udhar entries.</p>
+            </div>
+            <div class="view-header-actions">
+              <button class="btn btn-primary" onclick="App.saveCurrentReconciliation()">💾 Save Reconciliation Sheet</button>
+            </div>
+          </div>
+
+          <div class="panel-grid">
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>Shift Revenue vs Cash Drawer Balancing</h3>
+              </div>
+              <form id="form-reconciliation">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Reconciliation Date</label>
+                    <input type="date" id="recon-date" class="form-control" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Shift Name</label>
+                    <select id="recon-shift" class="form-control">
+                      <option value="Morning">Morning Shift</option>
+                      <option value="Evening">Evening Shift</option>
+                      <option value="Night">Night Shift</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Total Expected Shift Revenue (Auto-calculated from Nozzle Readings)</label>
+                  <input type="number" step="0.01" id="recon-expected" class="form-control" readonly style="font-weight: 700; background: #F1F5F9;">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Actual Cash Collected (₹)</label>
+                    <input type="number" step="0.01" id="recon-cash" class="form-control" value="0" oninput="App.calculateReconciliationDiff()">
+                  </div>
+                  <div class="form-group">
+                    <label>Digital PhonePe / UPI / POS (₹)</label>
+                    <input type="number" step="0.01" id="recon-digital" class="form-control" value="0" oninput="App.calculateReconciliationDiff()">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Udhar Credit Fuel Given (₹)</label>
+                  <input type="number" step="0.01" id="recon-udhar" class="form-control" value="0" oninput="App.calculateReconciliationDiff()">
+                </div>
+
+                <div class="form-group">
+                  <label>Cash Drawer Surplus / Shortage Balance</label>
+                  <div id="recon-diff-display" style="padding: 12px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; background: #F8FAFC; border: 1px solid var(--border-color);">
+                    ₹0.00 (Balanced)
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Notes / Explanatory Comments</label>
+                  <input type="text" id="recon-notes" class="form-control" placeholder="e.g. ₹50 short due to denomination shortage">
+                </div>
+              </form>
+            </div>
+
+            <div class="panel-card">
+              <div class="panel-header">
+                <h3>Past Reconciliation Logs</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Expected (₹)</th>
+                      <th>Actual Total (₹)</th>
+                      <th>Difference</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recon-history-table">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 6: CUSTOMER UDHAR LEDGER VIEW -->
+        <section id="view-credit" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Customer Udhar (Credit) Ledger</h2>
+              <p>Manage credit limits, record fuel given on credit, log repayments, and track balances.</p>
+            </div>
+            <div class="view-header-actions">
+              <button class="btn btn-secondary" onclick="App.openModal('modal-add-customer')">+ New Credit Customer</button>
+              <button class="btn btn-primary" onclick="App.openModal('modal-credit-txn')">+ Record Udhar Entry / Payment</button>
+            </div>
+          </div>
+
+          <div class="panel-card" style="margin-bottom: 24px;">
+            <div class="panel-header">
+              <h3>Credit Customer Directory & Outstanding Balances</h3>
+              <input type="text" id="customer-search-input" class="form-control" placeholder="🔍 Search by name or vehicle no..." style="width: 250px;" onkeyup="App.filterCustomers()">
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Vehicle No</th>
+                    <th>Credit Limit (₹)</th>
+                    <th>Current Due Balance (₹)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 7: DAILY EXPENSES VIEW -->
+        <section id="view-expenses" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Daily Station Expenses</h2>
+              <p>Log station operational costs like generator fuel, staff refreshments, maintenance, and utility bills.</p>
+            </div>
+            <div class="view-header-actions">
+              <button class="btn btn-primary" onclick="App.openModal('modal-add-expense')">+ Log Daily Expense</button>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Expense Log</h3>
+              <span id="expenses-total-badge" class="badge badge-navy" style="font-size: 0.9rem;">Total: ₹0</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Payment Method</th>
+                    <th>Description</th>
+                    <th>Amount (₹)</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="expenses-table">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 8: EMPLOYEE DIRECTORY VIEW -->
+        <section id="view-employees" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Employee & Shift Staff Directory</h2>
+              <p>Manage pump operators, attendants, supervisor shift schedules, and contact details.</p>
+            </div>
+            <div class="view-header-actions">
+              <button class="btn btn-primary" onclick="App.openModal('modal-add-employee')">+ Add Staff Member</button>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Active Staff Members</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Employee Name</th>
+                    <th>Role</th>
+                    <th>Phone</th>
+                    <th>Assigned Shift</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employees-table">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- MODULE 9: DAY-END SETTLEMENT REPORT VIEW -->
+        <section id="view-reports" class="view-section">
+          <div class="view-header">
+            <div class="view-title-box">
+              <h2>Day-End Shift Settlement Report</h2>
+              <p>Complete consolidated financial summary, fuel breakdown, and receipt export for Patrikar Petroleum Point.</p>
+            </div>
+            <div class="view-header-actions">
+              <input type="date" id="report-date-picker" class="form-control" style="width: auto;" onchange="App.loadDayEndReport()">
+              <button class="btn btn-secondary" onclick="App.exportReportCSV()">📥 Export CSV</button>
+              <button class="btn btn-navy" onclick="window.print()">🖨️ Print Receipt / PDF</button>
+            </div>
+          </div>
+
+          <div class="panel-card" id="printable-report-sheet">
+            <div style="text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--iocl-navy);">
+              <h2 style="color: var(--iocl-navy); font-family: var(--font-heading); font-size: 1.75rem;">PATRIKAR PETROLEUM POINT</h2>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">IndianOil Authorised Dealership • NH-48 Highway</p>
+              <h3 style="margin-top: 8px; color: var(--iocl-saffron);" id="report-sheet-date">DAILY SETTLEMENT SUMMARY SHEET</h3>
+            </div>
+
+            <!-- Summary Financials Table -->
+            <div class="kpi-grid" style="margin-bottom: 24px;">
+              <div class="kpi-card" style="background: #F8FAFC;">
+                <span class="kpi-title">Gross Nozzle Fuel Revenue</span>
+                <div class="kpi-value" id="report-gross-sales">₹0.00</div>
+              </div>
+              <div class="kpi-card" style="background: #F8FAFC;">
+                <span class="kpi-title">Total Litres Dispensed</span>
+                <div class="kpi-value" id="report-total-litres">0.00 L</div>
+              </div>
+              <div class="kpi-card" style="background: #F8FAFC;">
+                <span class="kpi-title">Total Station Expenses</span>
+                <div class="kpi-value" id="report-expenses" style="color: var(--danger);">₹0.00</div>
+              </div>
+              <div class="kpi-card" style="background: #F8FAFC;">
+                <span class="kpi-title">Net Cash in Drawer</span>
+                <div class="kpi-value" id="report-net-cash" style="color: var(--success);">₹0.00</div>
+              </div>
+            </div>
+
+            <!-- Fuel Type Sales Breakdown -->
+            <div style="margin-bottom: 24px;">
+              <h4 style="color: var(--iocl-navy); margin-bottom: 10px;">1. Fuel Category Breakdown</h4>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Fuel Type</th>
+                    <th>Unit Rate (₹/L)</th>
+                    <th>Litres Dispensed</th>
+                    <th>Total Amount (₹)</th>
+                  </tr>
+                </thead>
+                <tbody id="report-fuel-breakdown">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Shift Readings Table -->
+            <div style="margin-bottom: 24px;">
+              <h4 style="color: var(--iocl-navy); margin-bottom: 10px;">2. Nozzle Readings Log</h4>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Nozzle</th>
+                    <th>Fuel</th>
+                    <th>Opening</th>
+                    <th>Closing</th>
+                    <th>Testing</th>
+                    <th>Net Litres</th>
+                    <th>Total (₹)</th>
+                  </tr>
+                </thead>
+                <tbody id="report-nozzles-body">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Udhar & Expense Summary -->
+            <div class="form-row" style="margin-bottom: 24px;">
+              <div>
+                <h4 style="color: var(--iocl-navy); margin-bottom: 10px;">3. Udhar Fuel & Credit Collections</h4>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Customer / Vehicle</th>
+                      <th style="text-align: center;">Txn Type</th>
+                      <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-credit-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <h4 style="color: var(--iocl-navy); margin-bottom: 10px;">4. Station Expense Deductions</h4>
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Description</th>
+                      <th style="text-align: right;">Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="report-expenses-body">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+              <div style="text-align: center; width: 220px;">
+                <div style="border-bottom: 2px solid var(--iocl-navy); margin-bottom: 8px; width: 100%;"></div>
+                <p style="color: var(--iocl-navy); font-size: 0.9rem;"><strong>Pump Attendant Signature</strong></p>
+              </div>
+              <div style="text-align: center; width: 220px;">
+                <div style="border-bottom: 2px solid var(--iocl-navy); margin-bottom: 8px; width: 100%;"></div>
+                <p style="color: var(--iocl-navy); font-size: 0.9rem;"><strong>Station Manager Signature</strong></p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: Update Live Fuel Rates -->
+  <div class="modal-overlay" id="modal-update-rates">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Update Live Fuel Rates</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-update-rates')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-update-rates" onsubmit="App.handleUpdateRates(event)">
+          <div class="form-group">
+            <label>Petrol (MS) Rate per Litre (₹)</label>
+            <input type="number" step="0.01" id="input-rate-ms" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Diesel (HSD) Rate per Litre (₹)</label>
+            <input type="number" step="0.01" id="input-rate-hsd" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-update-rates')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Rates</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Log Nozzle Shift Reading -->
+  <div class="modal-overlay" id="modal-log-shift">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Log Nozzle Shift Meter Reading</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-log-shift')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-log-shift" onsubmit="App.handleLogShift(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Reading Date</label>
+              <input type="date" id="shift-input-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Shift Name</label>
+              <select id="shift-input-name" class="form-control" required>
+                <option value="Morning">Morning Shift</option>
+                <option value="Evening">Evening Shift</option>
+                <option value="Night">Night Shift</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nozzle Name / Dispenser</label>
+              <select id="shift-input-nozzle" class="form-control" required onchange="App.onNozzleSelected()">
+                <option value="MS Nozzle 1 (Dispenser A)" data-fuel="Petrol (MS)">MS Nozzle 1 (Dispenser A)</option>
+                <option value="MS Nozzle 2 (Dispenser A)" data-fuel="Petrol (MS)">MS Nozzle 2 (Dispenser A)</option>
+                <option value="HSD Nozzle 1 (Dispenser B)" data-fuel="Diesel (HSD)">HSD Nozzle 1 (Dispenser B)</option>
+                <option value="HSD Nozzle 2 (Dispenser B)" data-fuel="Diesel (HSD)">HSD Nozzle 2 (Dispenser B)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fuel Type</label>
+              <input type="text" id="shift-input-fuel" class="form-control" readonly style="background: #F1F5F9;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Opening Meter Reading</label>
+              <input type="number" step="0.01" id="shift-input-open" class="form-control" required oninput="App.calculateShiftNetLitres()">
+            </div>
+            <div class="form-group">
+              <label>Closing Meter Reading</label>
+              <input type="number" step="0.01" id="shift-input-close" class="form-control" required oninput="App.calculateShiftNetLitres()">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Testing Litres Deduction</label>
+              <input type="number" step="0.01" id="shift-input-testing" class="form-control" value="5.0" oninput="App.calculateShiftNetLitres()">
+            </div>
+            <div class="form-group">
+              <label>Unit Rate (₹/L)</label>
+              <input type="number" step="0.01" id="shift-input-rate" class="form-control" readonly style="background: #F1F5F9;">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Net Litres Sold</label>
+              <input type="number" step="0.01" id="shift-input-net-litres" class="form-control" readonly style="font-weight: 700; color: var(--iocl-navy); background: #F1F5F9;">
+            </div>
+            <div class="form-group">
+              <label>Total Bill Revenue (₹)</label>
+              <input type="number" step="0.01" id="shift-input-total-amount" class="form-control" readonly style="font-weight: 700; color: var(--iocl-saffron); background: #F1F5F9;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Assigned Attendant</label>
+            <select id="shift-input-attendant" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-log-shift')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Shift Reading</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Log Tanker Delivery (Refill Stock In) -->
+  <div class="modal-overlay" id="modal-tank-refill">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Log Tanker Stock Refill (Stock In)</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-tank-refill')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-tank-refill" onsubmit="App.handleTankRefill(event)">
+          <div class="form-group">
+            <label>Select Underground Tank</label>
+            <select id="refill-input-tank" class="form-control" required></select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Delivery Date</label>
+              <input type="date" id="refill-input-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Invoice / Challan No</label>
+              <input type="text" id="refill-input-invoice" class="form-control" placeholder="e.g. INV-998811">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Litres Added</label>
+              <input type="number" step="0.01" id="refill-input-litres" class="form-control" required placeholder="e.g. 5000">
+            </div>
+            <div class="form-group">
+              <label>Purchase Rate / Litre (₹)</label>
+              <input type="number" step="0.01" id="refill-input-rate" class="form-control" placeholder="e.g. 89.50">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Depot / Supplier Name</label>
+            <input type="text" id="refill-input-supplier" class="form-control" value="IndianOil Petroleum Terminal Depot">
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-tank-refill')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Tank Stock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Add Tank -->
+  <div class="modal-overlay" id="modal-add-tank">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add New Underground Tank</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-add-tank')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-tank" onsubmit="App.handleAddTank(event)">
+          <div class="form-group">
+            <label>Tank Name</label>
+            <input type="text" id="add-tank-name" class="form-control" placeholder="e.g. Tank 5 (Underground)" required>
+          </div>
+          <div class="form-group">
+            <label>Fuel Type</label>
+            <select id="add-tank-fuel" class="form-control" required>
+              <option value="Petrol (MS)">Petrol (MS)</option>
+              <option value="Diesel (HSD)">Diesel (HSD)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Maximum Capacity (Litres)</label>
+              <input type="number" step="0.01" id="add-tank-capacity" class="form-control" placeholder="20000" required>
+            </div>
+            <div class="form-group">
+              <label>Current Initial Stock (Litres)</label>
+              <input type="number" step="0.01" id="add-tank-stock" class="form-control" placeholder="10000" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-add-tank')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Tank</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: Add Credit Customer -->
+  <div class="modal-overlay" id="modal-add-customer">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Credit Customer</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-add-customer')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-customer" onsubmit="App.handleAddCustomer(event)">
+          <div class="form-group">
+            <label>Customer / Transport Firm Name</label>
+            <input type="text" id="cust-input-name" class="form-control" required placeholder="e.g. Patil Logistics Ltd">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="cust-input-phone" class="form-control" placeholder="9822114455">
+            </div>
+            <div class="form-group">
+              <label>Primary Vehicle Number</label>
+              <input type="text" id="cust-input-vehicle" class="form-control" placeholder="MH-12-AB-1234">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Credit Limit (₹)</label>
+            <input type="number" step="0.01" id="cust-input-limit" class="form-control" value="50000.00">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-add-customer')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: Record Udhar / Customer Txn -->
+  <div class="modal-overlay" id="modal-credit-txn">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Record Customer Udhar Entry / Repayment</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-credit-txn')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-credit-txn" onsubmit="App.handleCreditTxn(event)">
+          <div class="form-group">
+            <label>Select Customer</label>
+            <select id="ctxn-input-customer" class="form-control" required></select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Transaction Type</label>
+              <select id="ctxn-input-type" class="form-control" required>
+                <option value="GIVEN">Udhar Fuel Given (Credit Out)</option>
+                <option value="RECEIVED">Repayment Received (Cash/UPI In)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Transaction Date</label>
+              <input type="date" id="ctxn-input-date" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fuel Type (if applicable)</label>
+              <select id="ctxn-input-fuel" class="form-control">
+                <option value="">None / Cash Repayment</option>
+                <option value="Petrol (MS)">Petrol (MS)</option>
+                <option value="Diesel (HSD)">Diesel (HSD)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Litres Dispensed</label>
+              <input type="number" step="0.01" id="ctxn-input-litres" class="form-control" value="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="0.01" id="ctxn-input-amount" class="form-control" required placeholder="e.g. 5000">
+            </div>
+            <div class="form-group">
+              <label>Bill / Receipt Number</label>
+              <input type="text" id="ctxn-input-bill" class="form-control" placeholder="e.g. BILL-4029">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Notes / Driver Name</label>
+            <input type="text" id="ctxn-input-notes" class="form-control" placeholder="e.g. Driver Ramesh / Vehicle MH-12-8899">
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-credit-txn')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Entry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: Log Daily Expense -->
+  <div class="modal-overlay" id="modal-add-expense">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Log Daily Station Expense</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-add-expense')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-expense" onsubmit="App.handleAddExpense(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expense Date</label>
+              <input type="date" id="exp-input-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Expense Category</label>
+              <select id="exp-input-category" class="form-control" required>
+                <option value="Generator Fuel">Generator Diesel</option>
+                <option value="Tea & Refreshments">Tea & Refreshments</option>
+                <option value="Maintenance & Spares">Maintenance & Spares</option>
+                <option value="Electricity Bill">Electricity Bill</option>
+                <option value="Staff Wages Advance">Staff Wages Advance</option>
+                <option value="Misc Expenses">Misc Expenses</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="exp-input-method" class="form-control">
+                <option value="Cash">Cash Drawer</option>
+                <option value="UPI">UPI / GPay</option>
+                <option value="Card">Card</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount (₹)</label>
+              <input type="number" step="0.01" id="exp-input-amount" class="form-control" required placeholder="e.g. 850">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description / Note</label>
+            <input type="text" id="exp-input-desc" class="form-control" placeholder="e.g. Air compressor hose replacement">
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-add-expense')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Record Expense</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 8: Add Employee -->
+  <div class="modal-overlay" id="modal-add-employee">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Staff Member</h3>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-add-employee')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-employee" onsubmit="App.handleAddEmployee(event)">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="emp-input-name" class="form-control" required placeholder="e.g. Anil Kumar">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Role</label>
+              <select id="emp-input-role" class="form-control">
+                <option value="Pump Attendant">Pump Attendant</option>
+                <option value="Senior Attendant">Senior Attendant</option>
+                <option value="Pump Operator">Pump Operator</option>
+                <option value="Shift Supervisor">Shift Supervisor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="emp-input-phone" class="form-control" placeholder="9876543210">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Assigned Shift</label>
+              <select id="emp-input-shift" class="form-control">
+                <option value="Morning">Morning Shift</option>
+                <option value="Evening">Evening Shift</option>
+                <option value="Night">Night Shift</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="emp-input-status" class="form-control">
+                <option value="Active">Active</option>
+                <option value="Off Duty">Off Duty</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-add-employee')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Employee</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 9: Customer Udhar Ledger History -->
+  <div class="modal-overlay" id="modal-customer-ledger">
+    <div class="modal-card" style="max-width: 800px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="ledger-customer-name">Customer Udhar Ledger History</h3>
+          <p id="ledger-customer-info" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;"></p>
+        </div>
+        <button class="btn-close-modal" onclick="App.closeModal('modal-customer-ledger')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Fuel Type</th>
+                <th>Litres</th>
+                <th>Bill / Receipt</th>
+                <th>Amount (₹)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-transactions-table">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer" style="margin-top: 16px;">
+          <button type="button" class="btn btn-secondary" onclick="App.closeModal('modal-customer-ledger')">Close Ledger</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
