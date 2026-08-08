@@ -1,7 +1,7 @@
 /* =========================================================
    Patrikar Petroleum Point - API Client Layer
    ========================================================= */
-const API_BASE = '/api';
+const API_BASE = 'https://petrol-pump-admin.vercel.app/api';
 
 const API = {
   // Auth API
