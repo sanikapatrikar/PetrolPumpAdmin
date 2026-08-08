@@ -9,7 +9,7 @@ const dbConfig = {
   database: (process.env.DB_NAME || 'patrikar_petroleum').trim(),
   port: parseInt((process.env.DB_PORT || '3306').trim(), 10),
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 3,
   queueLimit: 0,
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 };
