@@ -3,15 +3,6 @@
    ========================================================= */
 const API_BASE = '/api';
 
-const getApiBaseUrl = () => {
-  if (typeof window === 'undefined') return 'http://localhost:5000/api';
-  if (window.location.port === '5000') return '/api';
-  const host = window.location.hostname || 'localhost';
-  return `http://${host}:5000/api`;
-};
-
-const API_BASE = getApiBaseUrl();
-
 const API = {
   // Auth API
   async login(username, password) {
