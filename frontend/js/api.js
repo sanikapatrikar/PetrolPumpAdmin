@@ -1,6 +1,7 @@
 /* =========================================================
    Patrikar Petroleum Point - API Client Layer
    ========================================================= */
+const API_BASE = '/api';
 
 const getApiBaseUrl = () => {
   if (typeof window === 'undefined') return 'http://localhost:5000/api';
