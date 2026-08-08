@@ -66,36 +66,41 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-const server = app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`⛽ Patrikar Petroleum Point - IndianOil Admin Portal`);
-  console.log(`🚀 REST API Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
-  console.log(`=======================================================`);
-});
+if (!process.env.VERCEL) {
+    const server = app.listen(PORT, () => {
+        console.log(`=======================================================`);
+        console.log(`⛽ Patrikar Petroleum Point - IndianOil Admin Portal`);
+        console.log(`🚀 REST API Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
+        console.log(`=======================================================`);
+    });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`⚠️  Port ${PORT} is already in use by another running server instance.`);
-    console.error(`👉 Solution: Stop the process on port ${PORT} or set PORT in .env.`);
-    process.exit(1);
-  } else {
-    console.error('Server error:', err);
-  }
-});
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.error(`⚠️ Port ${PORT} is already in use by another running server instance.`);
+            console.error(`👉 Solution: Stop the process on port ${PORT} or set PORT in .env.`);
+            process.exit(1);
+        } else {
+            console.error('Server error:', err);
+        }
+    });
 
-// Process exception and termination handling
+    process.on('SIGTERM', () => {
+        console.log('SIGTERM received. Shutting down server gracefully...');
+        server.close(() => {
+            console.log('Process terminated.');
+            process.exit(0);
+        });
+    });
+}
+
+// Process exception handling
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Promise Rejection:', reason);
+    console.error('Unhandled Promise Rejection:', reason);
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err.message);
+    console.error('Uncaught Exception:', err.message);
 });
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down server gracefully...');
-  server.close(() => {
-    console.log('Process terminated.');
-    process.exit(0);
-  });
-});
+// Vercel needs the Express app itself exported
+module.exports = app;
